@@ -17,7 +17,7 @@ class GridWorld
 {
 private:
     // Stores grid world layout
-    std::vector<std::vector<int>> grid_world;
+    std::vector<std::vector<int>> grid;
     // Stores the starting position
     std::tuple<int, int> start_pos;
     // Stores the goal position
