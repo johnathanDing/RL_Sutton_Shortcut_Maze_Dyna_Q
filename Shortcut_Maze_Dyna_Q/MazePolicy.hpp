@@ -14,6 +14,7 @@
 #include <map>
 #include <random>
 #include <time.h>
+#include <math.h>
 #include <iterator>
 #include <iostream>
 
@@ -33,7 +34,7 @@ private:
     // State-to-action value map for Dyna-Q+
     std::map<std::tuple<int, int>, std::vector<double>> state_action_val_DynaQ_Plus;
     // State-to-action interval (time step of last pick) for Dyna-Q+
-    std::map<std::tuple<int, int>, std::vector<int>> state_action_interval_DynaQ_Plus;
+    std::map<std::tuple<int, int>, std::vector<int>> state_action_time_DynaQ_Plus;
     
     // Parameter for time interval bonus reward in DYna-Q+
     double kappa;
@@ -66,8 +67,9 @@ public:
     /// @param curr_move Current action to be updated
     /// @param next_state Next state transitioned from current state-action
     /// @param reward Reward of current transition
+    /// @param time_stamp Current time stamp during training. Used for Dyna-Q+ bonus reward
     void updateStateActionVal_DynaQ_Plus(std::tuple<int, int> curr_state, std::tuple<int, int> curr_move,
-                                        std::tuple<int, int> next_state, double reward);
+                                         std::tuple<int, int> next_state, double reward, int time_stamp, bool bonus_reward);
     
     /// Returns the state-action value according to Dyna-Q
     /// @param curr_state Current state inquired

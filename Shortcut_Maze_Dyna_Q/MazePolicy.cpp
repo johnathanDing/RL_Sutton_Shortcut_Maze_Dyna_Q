@@ -19,4 +19,78 @@ alpha(input_alpha)
 };
 
 
+void MazePolicy::updateStateActionVal_DynaQ(std::tuple<int, int> curr_state, std::tuple<int, int> curr_move, std::tuple<int, int> next_state, double reward)
+{
+    // Initialize current state-action space if state is missing
+    if (state_action_space_DynaQ.find(curr_state) == state_action_space_DynaQ.end()) {
+        std::vector<std::tuple<int, int>> all_available_actions (maze_env.getAvailableMoves(curr_state));
+        state_action_space_DynaQ.insert(std::pair<std::tuple<int, int>, std::vector<std::tuple<int, int>>>
+                                        (curr_state, all_available_actions));
+        state_action_val_DynaQ.insert(std::pair<std::tuple<int, int>, std::vector<double>>
+                                      (curr_state, std::vector<double> (static_cast<int>(all_available_actions.size()), 0.0)));
+    }
+    
+    // Find the position of current action under current state
+    std::vector<std::tuple<int, int>>::iterator iter_curr_move;
+    iter_curr_move = std::find(state_action_space_DynaQ.at(curr_state).begin(),
+                               state_action_space_DynaQ.at(curr_state).end(), curr_move);
+    int idx_curr_move = static_cast<int>(std::distance(state_action_space_DynaQ.at(curr_state).begin(), iter_curr_move));
+    // Find the max state-action value of next state (Q-learning). If next state is not initialized yet, just use default 0.
+    double max_next_val;
+    if (state_action_space_DynaQ.find(next_state) == state_action_space_DynaQ.end()) {
+        max_next_val = 0.0;
+    }
+    else {
+        max_next_val = *std::max_element(state_action_val_DynaQ.at(next_state).begin(),
+                                         state_action_val_DynaQ.at(next_state).end());
+    }
+    
+    state_action_val_DynaQ.at(curr_state)[idx_curr_move] += alpha * (reward + gamma * max_next_val -
+                                                                     state_action_val_DynaQ.at(curr_state)[idx_curr_move]);
+};
 
+
+void MazePolicy::updateStateActionVal_DynaQ_Plus(std::tuple<int, int> curr_state, std::tuple<int, int> curr_move, std::tuple<int, int> next_state, double reward, int time_stamp, bool bonus_reward)
+{
+    // Initialize current state-action space if state is missing
+    if (state_action_space_DynaQ_Plus.find(curr_state) == state_action_space_DynaQ_Plus.end()) {
+        std::vector<std::tuple<int, int>> all_available_actions (maze_env.getAvailableMoves(curr_state));
+        state_action_space_DynaQ_Plus.insert(std::pair<std::tuple<int, int>, std::vector<std::tuple<int, int>>>
+                                             (curr_state, all_available_actions));
+        state_action_val_DynaQ_Plus.insert(std::pair<std::tuple<int, int>, std::vector<double>>
+                                           (curr_state,
+                                            std::vector<double> (static_cast<int>(all_available_actions.size()), 0.0)));
+        state_action_time_DynaQ_Plus.insert(std::pair<std::tuple<int, int>, std::vector<int>>
+                                            (curr_state,
+                                             std::vector<int> (static_cast<int>(all_available_actions.size()), time_stamp)));
+    }
+    
+    // Find the position of current action under current state
+    std::vector<std::tuple<int, int>>::iterator iter_curr_move;
+    iter_curr_move = std::find(state_action_space_DynaQ_Plus.at(curr_state).begin(),
+                               state_action_space_DynaQ_Plus.at(curr_state).end(), curr_move);
+    int idx_curr_move = static_cast<int>(std::distance(state_action_space_DynaQ_Plus.at(curr_state).begin(), iter_curr_move));
+    // Find the max state-action value of next state (Q-learning). If next state is not initialized yet, just use default 0.
+    double max_next_val;
+    if (state_action_space_DynaQ_Plus.find(next_state) == state_action_space_DynaQ_Plus.end()) {
+        max_next_val = 0.0;
+    }
+    else {
+        max_next_val = *std::max_element(state_action_val_DynaQ_Plus.at(next_state).begin(),
+                                         state_action_val_DynaQ_Plus.at(next_state).end());
+    }
+    
+    // Depending on flag bonus_reward (whether in real or simulated experience), choose whether to include bonus reward in update
+    if (bonus_reward) {
+        state_action_val_DynaQ_Plus.at(curr_state)[idx_curr_move] += alpha * (reward
+                                  + kappa*sqrt(time_stamp - state_action_time_DynaQ_Plus.at(curr_state)[idx_curr_move])
+                                  + gamma * max_next_val - state_action_val_DynaQ_Plus.at(curr_state)[idx_curr_move]);
+    }
+    else {
+        state_action_val_DynaQ_Plus.at(curr_state)[idx_curr_move] += alpha * (reward
+                                  + gamma * max_next_val - state_action_val_DynaQ_Plus.at(curr_state)[idx_curr_move]);
+    }
+    
+    // Update the time stamp of current action
+    state_action_time_DynaQ_Plus.at(curr_state)[idx_curr_move] = time_stamp;
+};
