@@ -83,19 +83,19 @@ public:
     
     /// Return action following greedy policy according to Dyna-Q
     /// @param curr_state Current state inquired
-    std::tuple<int, int> getGreedyPolicy_DynaQ(std::tuple<int, int> curr_state);
+    std::tuple<int, int> getGreedyPolicy_DynaQ(std::tuple<int, int> curr_state) const;
     
     /// Return action following greedy policy according to Dyna-Q+
     /// @param curr_state Current state inquired
-    std::tuple<int, int> getGreedyPolicy_DynaQ_Plus(std::tuple<int, int> curr_state);
+    std::tuple<int, int> getGreedyPolicy_DynaQ_Plus(std::tuple<int, int> curr_state) const;
     
     /// Return action following soft policy according to Dyna-Q
     /// @param curr_state Current state inquired
-    std::tuple<int, int> getSoftPolicy_DynaQ(std::tuple<int, int> curr_state);
+    std::tuple<int, int> getSoftPolicy_DynaQ(std::tuple<int, int> curr_state) const;
     
     /// Return action following soft policy according to Dyna-Q+
     /// @param curr_state Current state inquired
-    std::tuple<int, int> getSoftPolicy_DynaQ_Plus(std::tuple<int, int> curr_state);
+    std::tuple<int, int> getSoftPolicy_DynaQ_Plus(std::tuple<int, int> curr_state) const;
     
     /// Reacquires all available actions at a state for Dyna-Q. Use after a Maze change
     /// @param curr_state State to be reaquired
@@ -108,11 +108,11 @@ public:
 private:
     /// Return a random policy according to Dyna-Q
     /// @param curr_state Current state inquired
-    std::tuple<int, int> getRandomPolicy_DynaQ(std::tuple<int, int> curr_state);
+    std::tuple<int, int> getRandomPolicy_DynaQ(std::tuple<int, int> curr_state) const;
     
     /// Return a random policy according to Dyna-Q+
     /// @param curr_state Current state inquired
-    std::tuple<int, int> getRandomPolicy_DynaQ_Plus(std::tuple<int, int> curr_state);
+    std::tuple<int, int> getRandomPolicy_DynaQ_Plus(std::tuple<int, int> curr_state) const;
 };
 
 #endif /* MazePolicy_hpp */

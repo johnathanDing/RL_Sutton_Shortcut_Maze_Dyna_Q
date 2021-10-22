@@ -35,6 +35,7 @@ void MazePolicy::updateStateActionVal_DynaQ(std::tuple<int, int> curr_state, std
     iter_curr_move = std::find(state_action_space_DynaQ.at(curr_state).begin(),
                                state_action_space_DynaQ.at(curr_state).end(), curr_move);
     int idx_curr_move = static_cast<int>(std::distance(state_action_space_DynaQ.at(curr_state).begin(), iter_curr_move));
+    
     // Find the max state-action value of next state (Q-learning). If next state is not initialized yet, just use default 0.
     double max_next_val;
     if (state_action_space_DynaQ.find(next_state) == state_action_space_DynaQ.end()) {
@@ -45,6 +46,7 @@ void MazePolicy::updateStateActionVal_DynaQ(std::tuple<int, int> curr_state, std
                                          state_action_val_DynaQ.at(next_state).end());
     }
     
+    // Do the update
     state_action_val_DynaQ.at(curr_state)[idx_curr_move] += alpha * (reward + gamma * max_next_val -
                                                                      state_action_val_DynaQ.at(curr_state)[idx_curr_move]);
 };
@@ -70,6 +72,7 @@ void MazePolicy::updateStateActionVal_DynaQ_Plus(std::tuple<int, int> curr_state
     iter_curr_move = std::find(state_action_space_DynaQ_Plus.at(curr_state).begin(),
                                state_action_space_DynaQ_Plus.at(curr_state).end(), curr_move);
     int idx_curr_move = static_cast<int>(std::distance(state_action_space_DynaQ_Plus.at(curr_state).begin(), iter_curr_move));
+    
     // Find the max state-action value of next state (Q-learning). If next state is not initialized yet, just use default 0.
     double max_next_val;
     if (state_action_space_DynaQ_Plus.find(next_state) == state_action_space_DynaQ_Plus.end()) {
@@ -93,4 +96,62 @@ void MazePolicy::updateStateActionVal_DynaQ_Plus(std::tuple<int, int> curr_state
     
     // Update the time stamp of current action
     state_action_time_DynaQ_Plus.at(curr_state)[idx_curr_move] = time_stamp;
+};
+
+
+double MazePolicy::getStateActionVal_DynaQ(std::tuple<int, int> curr_state, std::tuple<int, int> curr_move) const
+{
+    double curr_val;
+    // If this state is never seen before, return default 0
+    if (state_action_space_DynaQ.find(curr_state) == state_action_space_DynaQ.end()) {
+        curr_val = 0.0;
+    }
+    // If seen this state before
+    else {
+        // Get the constant iterator
+        std::vector<std::tuple<int, int>>::const_iterator iter_curr_move
+        (std::find(state_action_space_DynaQ.at(curr_state).begin(),
+                   state_action_space_DynaQ.at(curr_state).end(), curr_move));
+        // If never seen this move in current state, also return default 0
+        if (iter_curr_move == state_action_space_DynaQ.at(curr_state).end()) {
+            curr_val = 0.0;
+        }
+        // If seen state-action pair before, return the stored value
+        else {
+            int idx_curr_move
+            (static_cast<int>(std::distance(state_action_space_DynaQ.at(curr_state).begin(), iter_curr_move)));
+            curr_val = state_action_val_DynaQ.at(curr_state)[idx_curr_move];
+        }
+    }
+    
+    return curr_val;
+};
+
+
+double MazePolicy::getStateActionVal_DynaQ_Plus(std::tuple<int, int> curr_state, std::tuple<int, int> curr_move) const
+{
+    double curr_val;
+    // If this state is never seen before, return default 0
+    if (state_action_space_DynaQ_Plus.find(curr_state) == state_action_space_DynaQ_Plus.end()) {
+        curr_val = 0.0;
+    }
+    // If seen this state before
+    else {
+        // Get the constant iterator
+        std::vector<std::tuple<int, int>>::const_iterator iter_curr_move
+        (std::find(state_action_space_DynaQ_Plus.at(curr_state).begin(),
+                   state_action_space_DynaQ_Plus.at(curr_state).end(), curr_move));
+        // If never seen this move in current state, also return default 0
+        if (iter_curr_move == state_action_space_DynaQ_Plus.at(curr_state).end()) {
+            curr_val = 0.0;
+        }
+        // If seen state-action pair before, return the stored value
+        else {
+            int idx_curr_move
+            (static_cast<int>(std::distance(state_action_space_DynaQ_Plus.at(curr_state).begin(), iter_curr_move)));
+            curr_val = state_action_val_DynaQ_Plus.at(curr_state)[idx_curr_move];
+        }
+    }
+    
+    return curr_val;
 };
