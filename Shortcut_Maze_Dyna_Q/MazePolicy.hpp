@@ -87,7 +87,9 @@ public:
     
     /// Return action following greedy policy according to Dyna-Q+
     /// @param curr_state Current state inquired
-    std::tuple<int, int> getGreedyPolicy_DynaQ_Plus(std::tuple<int, int> curr_state) const;
+    /// @param time_stamp Current time stamp at action inquiry
+    /// @param bonus_reward Whether bonus reward is considered during greedy action selection
+    std::tuple<int, int> getGreedyPolicy_DynaQ_Plus(std::tuple<int, int> curr_state, int time_stamp, bool bonus_reward) const;
     
     /// Return action following soft policy according to Dyna-Q
     /// @param curr_state Current state inquired

@@ -155,3 +155,76 @@ double MazePolicy::getStateActionVal_DynaQ_Plus(std::tuple<int, int> curr_state,
     
     return curr_val;
 };
+
+
+std::tuple<int, int> MazePolicy::getGreedyPolicy_DynaQ(std::tuple<int, int> curr_state) const
+{
+    std::tuple<int, int> greedy_move;
+    
+    // If state has not been seen, return a random policy
+    if (state_action_val_DynaQ.find(curr_state) == state_action_val_DynaQ.end()) {
+        std::cout << "State (" << std::get<0>(curr_state) << ", " << std::get<1>(curr_state)
+        <<") not found in state space. Returning random policy." << "\n";
+        greedy_move = getRandomPolicy_DynaQ(curr_state);
+    }
+    // If seen, return greedy policy as usual
+    else {
+        std::vector<double>::const_iterator iter_max_val;
+        iter_max_val = std::max_element(state_action_val_DynaQ.at(curr_state).begin(),
+                                        state_action_val_DynaQ.at(curr_state).end());
+        int idx_max_val (static_cast<int>(std::distance(state_action_val_DynaQ.at(curr_state).begin(), iter_max_val)));
+        greedy_move = state_action_space_DynaQ.at(curr_state)[idx_max_val];
+    }
+    
+    return greedy_move;
+};
+
+
+std::tuple<int, int> MazePolicy::getGreedyPolicy_DynaQ_Plus(std::tuple<int, int> curr_state,
+                                                            int time_stamp, bool bonus_reward) const
+{
+    std::tuple<int, int> greedy_move;
+    
+    // If state has not been seen, return a random policy
+    if (state_action_val_DynaQ_Plus.find(curr_state) == state_action_val_DynaQ_Plus.end()) {
+        std::cout << "State (" << std::get<0>(curr_state) << ", " << std::get<1>(curr_state)
+        <<") not found in state space. Returning random policy." << "\n";
+        greedy_move = getRandomPolicy_DynaQ_Plus(curr_state);
+    }
+    // If seen, return greedy policy as follows
+    else {
+        
+        int idx_max_val;
+        // If time interval bonus reward should be considered in action selection
+        if (bonus_reward) {
+            std::vector<double>::iterator iter_max_val;
+            // Get a new vector combining SA value and time reward
+            std::vector<double> sa_val_with_reward;
+            for (int i(0); i<static_cast<int>(state_action_val_DynaQ_Plus.at(curr_state).size()); ++i) {
+                sa_val_with_reward.push_back(state_action_val_DynaQ_Plus.at(curr_state)[i] +
+                                             kappa * sqrt(time_stamp - state_action_time_DynaQ_Plus.at(curr_state)[i]));
+                
+            }
+            iter_max_val = std::max_element(sa_val_with_reward.begin(), sa_val_with_reward.end());
+            idx_max_val = static_cast<int>(std::distance(sa_val_with_reward.begin(), iter_max_val));
+        }
+        // If bonus reward is not considered
+        else {
+            std::vector<double>::const_iterator iter_max_val;
+            iter_max_val = std::max_element(state_action_val_DynaQ_Plus.at(curr_state).begin(),
+                                            state_action_val_DynaQ_Plus.at(curr_state).end());
+            idx_max_val = static_cast<int>(std::distance(state_action_val_DynaQ_Plus.at(curr_state).begin(), iter_max_val));
+        }
+        greedy_move = state_action_space_DynaQ_Plus.at(curr_state)[idx_max_val];
+    }
+    
+    return greedy_move;
+};
+
+
+std::tuple<int, int> MazePolicy::getSoftPolicy_DynaQ(std::tuple<int, int> curr_state) const
+{
+    std::tuple<int, int> soft_move;
+    
+    return soft_move;
+};
