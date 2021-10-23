@@ -163,8 +163,6 @@ std::tuple<int, int> MazePolicy::getGreedyPolicy_DynaQ(std::tuple<int, int> curr
     
     // If state has not been seen, return a random policy
     if (state_action_val_DynaQ.find(curr_state) == state_action_val_DynaQ.end()) {
-        std::cout << "State (" << std::get<0>(curr_state) << ", " << std::get<1>(curr_state)
-        <<") not found in state space. Returning random policy." << "\n";
         greedy_move = getRandomPolicy_DynaQ(curr_state);
     }
     // If seen, return greedy policy as usual
@@ -187,8 +185,6 @@ std::tuple<int, int> MazePolicy::getGreedyPolicy_DynaQ_Plus(std::tuple<int, int>
     
     // If state has not been seen, return a random policy
     if (state_action_val_DynaQ_Plus.find(curr_state) == state_action_val_DynaQ_Plus.end()) {
-        std::cout << "State (" << std::get<0>(curr_state) << ", " << std::get<1>(curr_state)
-        <<") not found in state space. Returning random policy." << "\n";
         greedy_move = getRandomPolicy_DynaQ_Plus(curr_state);
     }
     // If seen, return greedy policy as follows
@@ -225,6 +221,63 @@ std::tuple<int, int> MazePolicy::getGreedyPolicy_DynaQ_Plus(std::tuple<int, int>
 std::tuple<int, int> MazePolicy::getSoftPolicy_DynaQ(std::tuple<int, int> curr_state) const
 {
     std::tuple<int, int> soft_move;
+    // Static RNG engine for soft policy
+    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+    static std::uniform_real_distribution<double> soft_RNG(0.0, 1.0);
+    
+    if (soft_RNG(mersenne_eng) <= epsilon_soft) {
+        soft_move = getRandomPolicy_DynaQ(curr_state);
+    } else {
+        soft_move = getGreedyPolicy_DynaQ(curr_state);
+    }
     
     return soft_move;
 };
+
+
+std::tuple<int, int> MazePolicy::getSoftPolicy_DynaQ_Plus(std::tuple<int, int> curr_state, int time_stamp) const
+{
+    std::tuple<int, int> soft_move;
+    // Static RNG engine for soft policy
+    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+    static std::uniform_real_distribution<double> soft_RNG(0.0, 1.0);
+    
+    if (soft_RNG(mersenne_eng) <= epsilon_soft) {
+        soft_move = getRandomPolicy_DynaQ_Plus(curr_state);
+    } else {
+        // Soft policy is only used in real experience, never in planning. So bonus reward is always false
+        soft_move = getGreedyPolicy_DynaQ_Plus(curr_state, time_stamp, false);
+    }
+    
+    return soft_move;
+};
+
+
+void MazePolicy::reAcquireStateActionSpace_DynaQ(std::tuple<int, int> curr_state)
+{
+    std::vector<std::tuple<int, int>> all_actions_new (maze_env.getAvailableMoves(curr_state));
+    for (std::tuple<int, int> move: all_actions_new) {
+        if (std::find(state_action_space_DynaQ.at(curr_state).begin(), state_action_space_DynaQ.at(curr_state).end(), move) ==
+            state_action_space_DynaQ.at(curr_state).end()) {
+            state_action_space_DynaQ.at(curr_state).push_back(move);
+            state_action_val_DynaQ.at(curr_state).push_back(0);
+        }
+    }
+};
+
+
+void MazePolicy::reAcquireStateActionSpace_DynaQ_Plus(std::tuple<int, int> curr_state, int time_stamp)
+{
+    std::vector<std::tuple<int, int>> all_actions_new (maze_env.getAvailableMoves(curr_state));
+    for (std::tuple<int, int> move: all_actions_new) {
+        if (std::find(state_action_space_DynaQ_Plus.at(curr_state).begin(),
+                      state_action_space_DynaQ_Plus.at(curr_state).end(), move) ==
+            state_action_space_DynaQ_Plus.at(curr_state).end()) {
+            state_action_space_DynaQ_Plus.at(curr_state).push_back(move);
+            state_action_val_DynaQ_Plus.at(curr_state).push_back(0);
+            state_action_time_DynaQ_Plus.at(curr_state).push_back(time_stamp);
+        }
+    }
+};
+
+
