@@ -17,7 +17,7 @@ class GridWorld
 {
 private:
     // Stores grid world layout
-    std::vector<std::vector<int>> grid_world;
+    std::vector<std::vector<int>> grid;
     // Stores the starting position
     std::tuple<int, int> start_pos;
     // Stores the goal position
@@ -25,7 +25,7 @@ private:
     
 public:
     /// Constructor of GridWorld class
-    /// @param input_grid Input 2D vector of grid world layout
+    /// @param input_grid Input 2D vector of grid world layout. 0 means empty grid, 1 means wall.
     /// @param input_start Input tuple of starting position
     /// @param input_goal Input tuple of goal position
     GridWorld(std::vector<std::vector<int>> input_grid, std::tuple<int, int> input_start, std::tuple<int, int> input_goal);
@@ -38,6 +38,11 @@ public:
     
     /// Returns the tuple of goal position
     std::tuple<int, int> getGoalPos() const;
+    
+    /// Changes the grid at a specific position
+    /// @param input_row Row of position to be changed
+    /// @param input_col Column of position to be changed
+    void changeGrid(int input_row, int input_col);
 };
 
 
