@@ -238,7 +238,7 @@ std::tuple<int, int> MazePolicy::getSoftPolicy_DynaQ(std::tuple<int, int> curr_s
 std::tuple<int, int> MazePolicy::getSoftPolicy_DynaQ_Plus(std::tuple<int, int> curr_state, int time_stamp) const
 {
     std::tuple<int, int> soft_move;
-    // Static RNG engine for soft policy
+    // Static RNG for soft policy
     static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
     static std::uniform_real_distribution<double> soft_RNG(0.0, 1.0);
     
@@ -274,10 +274,42 @@ void MazePolicy::reAcquireStateActionSpace_DynaQ_Plus(std::tuple<int, int> curr_
                       state_action_space_DynaQ_Plus.at(curr_state).end(), move) ==
             state_action_space_DynaQ_Plus.at(curr_state).end()) {
             state_action_space_DynaQ_Plus.at(curr_state).push_back(move);
-            state_action_val_DynaQ_Plus.at(curr_state).push_back(0);
+            state_action_val_DynaQ_Plus.at(curr_state).push_back(0.0);
             state_action_time_DynaQ_Plus.at(curr_state).push_back(time_stamp);
         }
     }
 };
 
 
+std::tuple<int, int> MazePolicy::getRandomPolicy_DynaQ(std::tuple<int, int> curr_state) const
+{
+    std::tuple<int, int> random_move;
+    
+    // Static RNG for random policy selection
+    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+    
+    // State-specific size
+    int action_size (static_cast<int>(state_action_space_DynaQ.at(curr_state).size()));
+    std::uniform_int_distribution<> action_RNG(0, action_size-1);
+    
+    random_move = state_action_space_DynaQ.at(curr_state)[action_RNG(mersenne_eng)];
+    
+    return random_move;
+};
+
+
+std::tuple<int, int> MazePolicy::getRandomPolicy_DynaQ_Plus(std::tuple<int, int> curr_state) const
+{
+    std::tuple<int, int> random_move;
+    
+    // Static RNG for random policy selection
+    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+    
+    // State-specific size
+    int action_size (static_cast<int>(state_action_space_DynaQ_Plus.at(curr_state).size()));
+    std::uniform_int_distribution<> action_RNG(0, action_size-1);
+    
+    random_move = state_action_space_DynaQ_Plus.at(curr_state)[action_RNG(mersenne_eng)];
+    
+    return random_move;
+};

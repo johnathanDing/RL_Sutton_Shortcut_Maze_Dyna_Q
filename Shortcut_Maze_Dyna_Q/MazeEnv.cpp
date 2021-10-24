@@ -50,7 +50,7 @@ MazeResponse MazeEnv::getMazeResponse(std::tuple<int, int> curr_state, std::tupl
     }
 
     response.next_state = std::make_tuple(next_i, next_j);
-    response.finished = (curr_state == goal_pos);
+    response.finished = (response.next_state == goal_pos);
     response.reward = (response.finished ? 1 : 0);
     
     return response;
