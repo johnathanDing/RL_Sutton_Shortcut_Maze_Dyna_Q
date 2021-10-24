@@ -48,7 +48,7 @@ void MazePolicy::updateStateActionVal_DynaQ(std::tuple<int, int> curr_state, std
     
     // Do the update
     state_action_val_DynaQ.at(curr_state)[idx_curr_move] += alpha * (reward + gamma * max_next_val -
-                                                                     state_action_val_DynaQ.at(curr_state)[idx_curr_move]);
+                                                                     state_action_val_DynaQ.at(curr_state).at(idx_curr_move));
 };
 
 
@@ -86,16 +86,16 @@ void MazePolicy::updateStateActionVal_DynaQ_Plus(std::tuple<int, int> curr_state
     // Depending on flag bonus_reward (whether in real or simulated experience), choose whether to include bonus reward in update
     if (bonus_reward) {
         state_action_val_DynaQ_Plus.at(curr_state)[idx_curr_move] += alpha * (reward
-                                  + kappa*sqrt(time_stamp - state_action_time_DynaQ_Plus.at(curr_state)[idx_curr_move])
-                                  + gamma * max_next_val - state_action_val_DynaQ_Plus.at(curr_state)[idx_curr_move]);
+                                  + kappa*sqrt(time_stamp - state_action_time_DynaQ_Plus.at(curr_state).at(idx_curr_move))
+                                  + gamma * max_next_val - state_action_val_DynaQ_Plus.at(curr_state).at(idx_curr_move));
     }
     else {
         state_action_val_DynaQ_Plus.at(curr_state)[idx_curr_move] += alpha * (reward
-                                  + gamma * max_next_val - state_action_val_DynaQ_Plus.at(curr_state)[idx_curr_move]);
+                                  + gamma * max_next_val - state_action_val_DynaQ_Plus.at(curr_state).at(idx_curr_move));
     }
     
     // Update the time stamp of current action
-    state_action_time_DynaQ_Plus.at(curr_state)[idx_curr_move] = time_stamp;
+    state_action_time_DynaQ_Plus.at(curr_state).at(idx_curr_move)= time_stamp;
 };
 
 
@@ -112,16 +112,10 @@ double MazePolicy::getStateActionVal_DynaQ(std::tuple<int, int> curr_state, std:
         std::vector<std::tuple<int, int>>::const_iterator iter_curr_move
         (std::find(state_action_space_DynaQ.at(curr_state).begin(),
                    state_action_space_DynaQ.at(curr_state).end(), curr_move));
-        // If never seen this move in current state, also return default 0
-        if (iter_curr_move == state_action_space_DynaQ.at(curr_state).end()) {
-            curr_val = 0.0;
-        }
-        // If seen state-action pair before, return the stored value
-        else {
-            int idx_curr_move
-            (static_cast<int>(std::distance(state_action_space_DynaQ.at(curr_state).begin(), iter_curr_move)));
-            curr_val = state_action_val_DynaQ.at(curr_state)[idx_curr_move];
-        }
+
+        int idx_curr_move
+        (static_cast<int>(std::distance(state_action_space_DynaQ.at(curr_state).begin(), iter_curr_move)));
+        curr_val = state_action_val_DynaQ.at(curr_state).at(idx_curr_move);
     }
     
     return curr_val;
@@ -141,16 +135,10 @@ double MazePolicy::getStateActionVal_DynaQ_Plus(std::tuple<int, int> curr_state,
         std::vector<std::tuple<int, int>>::const_iterator iter_curr_move
         (std::find(state_action_space_DynaQ_Plus.at(curr_state).begin(),
                    state_action_space_DynaQ_Plus.at(curr_state).end(), curr_move));
-        // If never seen this move in current state, also return default 0
-        if (iter_curr_move == state_action_space_DynaQ_Plus.at(curr_state).end()) {
-            curr_val = 0.0;
-        }
-        // If seen state-action pair before, return the stored value
-        else {
-            int idx_curr_move
-            (static_cast<int>(std::distance(state_action_space_DynaQ_Plus.at(curr_state).begin(), iter_curr_move)));
-            curr_val = state_action_val_DynaQ_Plus.at(curr_state)[idx_curr_move];
-        }
+
+        int idx_curr_move
+        (static_cast<int>(std::distance(state_action_space_DynaQ_Plus.at(curr_state).begin(), iter_curr_move)));
+        curr_val = state_action_val_DynaQ_Plus.at(curr_state).at(idx_curr_move);
     }
     
     return curr_val;
@@ -171,7 +159,7 @@ std::tuple<int, int> MazePolicy::getGreedyPolicy_DynaQ(std::tuple<int, int> curr
         iter_max_val = std::max_element(state_action_val_DynaQ.at(curr_state).begin(),
                                         state_action_val_DynaQ.at(curr_state).end());
         int idx_max_val (static_cast<int>(std::distance(state_action_val_DynaQ.at(curr_state).begin(), iter_max_val)));
-        greedy_move = state_action_space_DynaQ.at(curr_state)[idx_max_val];
+        greedy_move = state_action_space_DynaQ.at(curr_state).at(idx_max_val);
     }
     
     return greedy_move;
@@ -198,7 +186,7 @@ std::tuple<int, int> MazePolicy::getGreedyPolicy_DynaQ_Plus(std::tuple<int, int>
             std::vector<double> sa_val_with_reward;
             for (int i(0); i<static_cast<int>(state_action_val_DynaQ_Plus.at(curr_state).size()); ++i) {
                 sa_val_with_reward.push_back(state_action_val_DynaQ_Plus.at(curr_state)[i] +
-                                             kappa * sqrt(time_stamp - state_action_time_DynaQ_Plus.at(curr_state)[i]));
+                                             kappa * sqrt(time_stamp - state_action_time_DynaQ_Plus.at(curr_state).at(i)));
                 
             }
             iter_max_val = std::max_element(sa_val_with_reward.begin(), sa_val_with_reward.end());
@@ -211,7 +199,7 @@ std::tuple<int, int> MazePolicy::getGreedyPolicy_DynaQ_Plus(std::tuple<int, int>
                                             state_action_val_DynaQ_Plus.at(curr_state).end());
             idx_max_val = static_cast<int>(std::distance(state_action_val_DynaQ_Plus.at(curr_state).begin(), iter_max_val));
         }
-        greedy_move = state_action_space_DynaQ_Plus.at(curr_state)[idx_max_val];
+        greedy_move = state_action_space_DynaQ_Plus.at(curr_state).at(idx_max_val);
     }
     
     return greedy_move;
@@ -292,7 +280,7 @@ std::tuple<int, int> MazePolicy::getRandomPolicy_DynaQ(std::tuple<int, int> curr
     int action_size (static_cast<int>(state_action_space_DynaQ.at(curr_state).size()));
     std::uniform_int_distribution<> action_RNG(0, action_size-1);
     
-    random_move = state_action_space_DynaQ.at(curr_state)[action_RNG(mersenne_eng)];
+    random_move = state_action_space_DynaQ.at(curr_state).at(action_RNG(mersenne_eng));
     
     return random_move;
 };
@@ -309,7 +297,7 @@ std::tuple<int, int> MazePolicy::getRandomPolicy_DynaQ_Plus(std::tuple<int, int>
     int action_size (static_cast<int>(state_action_space_DynaQ_Plus.at(curr_state).size()));
     std::uniform_int_distribution<> action_RNG(0, action_size-1);
     
-    random_move = state_action_space_DynaQ_Plus.at(curr_state)[action_RNG(mersenne_eng)];
+    random_move = state_action_space_DynaQ_Plus.at(curr_state).at(action_RNG(mersenne_eng));
     
     return random_move;
 };
