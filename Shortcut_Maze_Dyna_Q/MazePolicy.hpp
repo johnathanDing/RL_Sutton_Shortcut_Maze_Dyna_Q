@@ -97,7 +97,8 @@ public:
     
     /// Return action following soft policy according to Dyna-Q+
     /// @param curr_state Current state inquired
-    std::tuple<int, int> getSoftPolicy_DynaQ_Plus(std::tuple<int, int> curr_state) const;
+    /// @param time_stamp Current time stamp
+    std::tuple<int, int> getSoftPolicy_DynaQ_Plus(std::tuple<int, int> curr_state, int time_stamp) const;
     
     /// Reacquires all available actions at a state for Dyna-Q. Use after a Maze change
     /// @param curr_state State to be reaquired
@@ -105,7 +106,8 @@ public:
     
     /// Reacquires all available actions at a state for Dyna-Q+. Use after a Maze change
     /// @param curr_state State to be reaquired
-    void reAcquireStateActionSpace_DynaQ_Plus(std::tuple<int, int> curr_state);
+    /// @param time_stamp Current time stamp
+    void reAcquireStateActionSpace_DynaQ_Plus(std::tuple<int, int> curr_state, int time_stamp);
     
 private:
     /// Return a random policy according to Dyna-Q

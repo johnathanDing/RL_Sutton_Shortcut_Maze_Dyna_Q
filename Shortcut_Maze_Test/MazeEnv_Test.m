@@ -59,8 +59,8 @@
     MazeResponse test_response;
     XCTAssertThrows(test_response = test_maze_env->getMazeResponse(std::make_tuple(1, 8), std::make_tuple(1, 0)));
     
-    test_response = test_maze_env->getMazeResponse(std::make_tuple(5, 8), std::make_tuple(-1, 0));
-    XCTAssertEqual(test_response.next_state, std::make_tuple(4, 8));
+    test_response = test_maze_env->getMazeResponse(std::make_tuple(4, 8), std::make_tuple(1, 0));
+    XCTAssertEqual(test_response.next_state, std::make_tuple(5, 8));
     XCTAssertEqual(test_response.reward, 1);
     XCTAssertTrue(test_response.finished);
     
