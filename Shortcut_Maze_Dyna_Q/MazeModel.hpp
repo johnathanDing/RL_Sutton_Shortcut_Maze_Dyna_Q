@@ -52,7 +52,7 @@ public:
     /// @param next_state Next state in experience
     /// @param reward Reward of current experience
     void memorizeStateAction_DynaQ(std::tuple<int, int> curr_state, std::tuple<int, int> curr_move,
-                                   std::tuple<int, int> next_state, int reward);
+                                   std::tuple<int, int> next_state, double reward);
     
     /// Memorizes the current experience in MazeModel, according to Dyna-Q+
     /// @param curr_state Current state in experience
@@ -60,7 +60,7 @@ public:
     /// @param next_state Next state in experience
     /// @param reward Reward of current experience
     void memorizeStateAction_DynaQ_Plus(std::tuple<int, int> curr_state, std::tuple<int, int> curr_move,
-                                        std::tuple<int, int> next_state, int reward);
+                                        std::tuple<int, int> next_state, double reward);
     
     /// Get a random past experience from the model, according to Dyna-Q
     MazePastExp getPastResponse_DynaQ() const;
