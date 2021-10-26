@@ -21,7 +21,7 @@
 struct MazePastExp
 {
     // Previsouly visited state, action, and resultant state
-    std::tuple<int, int> prev_state, prev_move, result_move;
+    std::tuple<int, int> prev_state, prev_move, result_state;
     // Previous resultant reward
     int result_reward;
 };
