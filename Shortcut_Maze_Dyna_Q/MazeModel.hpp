@@ -21,7 +21,7 @@
 struct MazePastExp
 {
     // Previsouly visited state, action, and resultant state
-    std::tuple<int, int> prev_state, prev_move, result_move;
+    std::tuple<int, int> prev_state, prev_move, result_state;
     // Previous resultant reward
     int result_reward;
 };
@@ -67,6 +67,10 @@ public:
     
     /// Get a random past experience from the model, according to Dyna-Q+
     MazePastExp getPastResponse_DynaQ_Plus() const;
+    
+    /// Reacquires the Dyna-Q+ model after a MazeEnv change
+    /// @param curr_state State to be updated in model.
+    void reacquireModel_DynaQ_Plus(std::tuple<int, int> curr_state);
 };
 
 #endif /* MazeModel_hpp */
