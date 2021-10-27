@@ -141,8 +141,6 @@
                   != test_result_states.end());
     XCTAssertTrue(std::find(test_result_states.begin(), test_result_states.end(), test_response_3.next_state)
                   == test_result_states.end());
-    
-    
 }
 
 @end
