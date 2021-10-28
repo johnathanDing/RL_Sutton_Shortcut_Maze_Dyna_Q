@@ -274,7 +274,8 @@ std::tuple<int, int> MazePolicy::getRandomPolicy_DynaQ(std::tuple<int, int> curr
     std::tuple<int, int> random_move;
     
     // Static RNG for random policy selection
-    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+//    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+    static std::mt19937 mersenne_eng;
     
     // State-specific size
     int action_size (static_cast<int>(state_action_space_DynaQ.at(curr_state).size()));
@@ -291,7 +292,8 @@ std::tuple<int, int> MazePolicy::getRandomPolicy_DynaQ_Plus(std::tuple<int, int>
     std::tuple<int, int> random_move;
     
     // Static RNG for random policy selection
-    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+//    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+    static std::mt19937 mersenne_eng;
     
     // State-specific size
     int action_size (static_cast<int>(state_action_space_DynaQ_Plus.at(curr_state).size()));
