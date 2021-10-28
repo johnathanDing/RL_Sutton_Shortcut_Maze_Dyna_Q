@@ -85,6 +85,7 @@ void MazePolicy::updateStateActionVal_DynaQ_Plus(std::tuple<int, int> curr_state
     
     // Depending on flag bonus_reward (whether in real or simulated experience), choose whether to include bonus reward in update
     if (bonus_reward) {
+        // Include time bonus reward in update, without updating time stamp since this is simulated experience
         state_action_val_DynaQ_Plus.at(curr_state)[idx_curr_move] += alpha * (reward
                                   + kappa*sqrt(time_stamp - state_action_time_DynaQ_Plus.at(curr_state).at(idx_curr_move))
                                   + gamma * max_next_val - state_action_val_DynaQ_Plus.at(curr_state).at(idx_curr_move));
@@ -92,10 +93,9 @@ void MazePolicy::updateStateActionVal_DynaQ_Plus(std::tuple<int, int> curr_state
     else {
         state_action_val_DynaQ_Plus.at(curr_state)[idx_curr_move] += alpha * (reward
                                   + gamma * max_next_val - state_action_val_DynaQ_Plus.at(curr_state).at(idx_curr_move));
+        // Update the time stamp of current action, only for real experience
+        state_action_time_DynaQ_Plus.at(curr_state).at(idx_curr_move)= time_stamp;
     }
-    
-    // Update the time stamp of current action
-    state_action_time_DynaQ_Plus.at(curr_state).at(idx_curr_move)= time_stamp;
 };
 
 
@@ -223,7 +223,8 @@ std::tuple<int, int> MazePolicy::getSoftPolicy_DynaQ(std::tuple<int, int> curr_s
 };
 
 
-std::tuple<int, int> MazePolicy::getSoftPolicy_DynaQ_Plus(std::tuple<int, int> curr_state, int time_stamp) const
+std::tuple<int, int> MazePolicy::getSoftPolicy_DynaQ_Plus(std::tuple<int, int> curr_state,
+                                                          int time_stamp, bool bonus_reward) const
 {
     std::tuple<int, int> soft_move;
     // Static RNG for soft policy
@@ -233,8 +234,8 @@ std::tuple<int, int> MazePolicy::getSoftPolicy_DynaQ_Plus(std::tuple<int, int> c
     if (soft_RNG(mersenne_eng) <= epsilon_soft) {
         soft_move = getRandomPolicy_DynaQ_Plus(curr_state);
     } else {
-        // Soft policy is only used in real experience, never in planning. So bonus reward is always false
-        soft_move = getGreedyPolicy_DynaQ_Plus(curr_state, time_stamp, false);
+        // Pass the selection criteria (whether use bonus reward) to the greedy action selection
+        soft_move = getGreedyPolicy_DynaQ_Plus(curr_state, time_stamp, bonus_reward);
     }
     
     return soft_move;
