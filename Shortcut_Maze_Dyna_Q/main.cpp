@@ -96,6 +96,12 @@ int main() {
                                              maze_response_DynaQ.next_state, maze_response_DynaQ.reward);
         maze_model.memorizeStateAction_DynaQ_Plus(curr_state_DynaQ_Plus, curr_move_DynaQ_Plus,
                                                   maze_response_DynaQ_Plus.next_state, maze_response_DynaQ_Plus.reward);
+        
+        // Calculate the training progress and record in file
+        cum_reward_DynaQ += maze_response_DynaQ.reward;
+        cum_reward_DynaQ_Plus += maze_response_DynaQ_Plus.reward;
+        training_file << time_step << " " << cum_reward_DynaQ << "  " << cum_reward_DynaQ_Plus << std::endl;
+        
         /// Planning using simulated experience
         for (int i(0); i<n_planning; ++i) {
             // Get random past experience
@@ -113,4 +119,13 @@ int main() {
         // Increment the time step
         ++ time_step;
     }
+    
+    // Close recording file
+    training_file.close();
+    // Print total training time
+    clock_t total_time(clock() - start_time);
+    std::cout << "Total training time is: " << static_cast<double>(total_time)/CLOCKS_PER_SEC << " sec." << "\n";
+    
+    // Generate a fully-trained, Dyna-Q greedy policy to visualize result
+    
 }
