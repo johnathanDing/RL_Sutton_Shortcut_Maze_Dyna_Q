@@ -123,6 +123,9 @@
     test_maze_policy->updateStateActionVal_DynaQ_Plus(test_state_1, test_move_1,
                                                       test_response_1.next_state, test_response_1.reward,
                                                       999, false);
+    test_maze_policy->updateStateActionVal_DynaQ_Plus(test_state_1, test_move_2,
+                                                      test_response_2.next_state, test_response_2.reward,
+                                                      999, false);
     XCTAssertEqual(test_maze_policy->getGreedyPolicy_DynaQ_Plus(test_state_1, 1001, true), std::make_tuple(0, -1));
 }
 

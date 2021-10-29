@@ -98,7 +98,7 @@ public:
     /// Return action following soft policy according to Dyna-Q+
     /// @param curr_state Current state inquired
     /// @param time_stamp Current time stamp
-    std::tuple<int, int> getSoftPolicy_DynaQ_Plus(std::tuple<int, int> curr_state, int time_stamp) const;
+    std::tuple<int, int> getSoftPolicy_DynaQ_Plus(std::tuple<int, int> curr_state, int time_stamp, bool bonus_reward) const;
     
     /// Reacquires all available actions at a state for Dyna-Q. Use after a Maze change
     /// @param curr_state State to be reaquired

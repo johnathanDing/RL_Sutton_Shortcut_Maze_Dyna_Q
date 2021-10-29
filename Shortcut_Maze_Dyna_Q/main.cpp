@@ -31,6 +31,9 @@ int main() {
     MazeModel maze_model(maze_env);
     MazeVisualizer maze_visual(grid_world);
     
+    // Dyna-Q planning step number
+    int n_planning(50);
+    
     // Prepare to record training data in a file
     int time_step(0), time_limit(6000), cum_reward_DynaQ(0), cum_reward_DynaQ_Plus(0);
     std::ofstream training_file("Training_statistics.txt");
@@ -51,22 +54,78 @@ int main() {
     // Print a message
     std::cout << "Training has started!" << "\n";
     
-    // Initialize state-action variables
+    // Declare state-action variables for real experience
     std::tuple<int, int> curr_state_DynaQ, curr_move_DynaQ, curr_state_DynaQ_Plus, curr_move_DynaQ_Plus;
     // Initialize the response structs to be goal state, for easy transition at the start of training
-    MazeResponse maze_response_DynaQ{{grid_world.getGoalPos()}, {1}, {true}},
-                 maze_response_DynaQ_Plus{{grid_world.getGoalPos()}, {1}, {true}};
+    MazeResponse maze_response_DynaQ{{grid_world.getGoalPos()}, 1, true},
+                 maze_response_DynaQ_Plus{{grid_world.getGoalPos()}, 1, true};
+    
+    // Declare simulated experience
+    MazePastExp rand_simulation_DynaQ, rand_simulation_DynaQ_Plus;
     
     while (time_step < time_limit) {
+        // Open up the shortcut at time stamp = 3000
+        if (time_step == 3000) {
+            grid_world.changeGrid(2, 8);
+        }
+        
+        /// Real Exprience
         // If a Dyna-Q episode is just finished, start a new one
         if (maze_response_DynaQ.finished) {
             curr_state_DynaQ = grid_world.getStartPos();
-            curr_move_DynaQ = maze_policy.getSoftPolicy_DynaQ(curr_state_DynaQ);
         }
         // If a Dyna-Q+ episode is just finished, start a new one
         if (maze_response_DynaQ_Plus.finished) {
             curr_state_DynaQ_Plus = grid_world.getStartPos();
-            curr_move_DynaQ_Plus = maze_policy.getSoftPolicy_DynaQ_Plus(curr_state_DynaQ_Plus, time_step);
         }
+        // Get the actions according to soft policy
+        curr_move_DynaQ = maze_policy.getSoftPolicy_DynaQ(curr_state_DynaQ);
+        curr_move_DynaQ_Plus = maze_policy.getSoftPolicy_DynaQ_Plus(curr_state_DynaQ_Plus, time_step, false);
+        // Get the response from state-action
+        maze_response_DynaQ = maze_env.getMazeResponse(curr_state_DynaQ, curr_move_DynaQ);
+        maze_response_DynaQ_Plus = maze_env.getMazeResponse(curr_state_DynaQ_Plus, curr_move_DynaQ_Plus);
+        // Update the state-aciton values
+        maze_policy.updateStateActionVal_DynaQ(curr_state_DynaQ, curr_move_DynaQ,
+                                               maze_response_DynaQ.next_state, maze_response_DynaQ.reward);
+        // No bonus reward for Dyna-Q+ during real experience
+        maze_policy.updateStateActionVal_DynaQ_Plus(curr_state_DynaQ_Plus, curr_move_DynaQ_Plus,
+                                                    maze_response_DynaQ_Plus.next_state, maze_response_DynaQ_Plus.reward,
+                                                    time_step, false);
+        // Update the planning model
+        maze_model.memorizeStateAction_DynaQ(curr_state_DynaQ, curr_move_DynaQ,
+                                             maze_response_DynaQ.next_state, maze_response_DynaQ.reward);
+        maze_model.memorizeStateAction_DynaQ_Plus(curr_state_DynaQ_Plus, curr_move_DynaQ_Plus,
+                                                  maze_response_DynaQ_Plus.next_state, maze_response_DynaQ_Plus.reward);
+        
+        // Calculate the training progress and record in file
+        cum_reward_DynaQ += maze_response_DynaQ.reward;
+        cum_reward_DynaQ_Plus += maze_response_DynaQ_Plus.reward;
+        training_file << time_step << " " << cum_reward_DynaQ << "  " << cum_reward_DynaQ_Plus << std::endl;
+        
+        /// Planning using simulated experience
+        for (int i(0); i<n_planning; ++i) {
+            // Get random past experience
+            rand_simulation_DynaQ = maze_model.getPastResponse_DynaQ();
+            rand_simulation_DynaQ_Plus = maze_model.getPastResponse_DynaQ_Plus();
+            // Update state-action value with the simulated step
+            maze_policy.updateStateActionVal_DynaQ(rand_simulation_DynaQ.prev_state, rand_simulation_DynaQ.prev_move,
+                                                   rand_simulation_DynaQ.result_state, rand_simulation_DynaQ.result_reward);
+            maze_policy.updateStateActionVal_DynaQ_Plus(rand_simulation_DynaQ_Plus.prev_state,
+                                                        rand_simulation_DynaQ_Plus.prev_move,
+                                                        rand_simulation_DynaQ_Plus.result_state,
+                                                        rand_simulation_DynaQ_Plus.result_reward, time_step, true);
+        }
+        
+        // Increment the time step
+        ++ time_step;
     }
+    
+    // Close recording file
+    training_file.close();
+    // Print total training time
+    clock_t total_time(clock() - start_time);
+    std::cout << "Total training time is: " << static_cast<double>(total_time)/CLOCKS_PER_SEC << " sec." << "\n";
+    
+    // Generate a fully-trained, Dyna-Q greedy policy to visualize result
+    
 }
