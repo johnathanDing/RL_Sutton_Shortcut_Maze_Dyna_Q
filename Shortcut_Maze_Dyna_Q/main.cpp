@@ -67,16 +67,24 @@ int main() {
         // Open up the shortcut at time stamp = 3000
         if (time_step == 3000) {
             grid_world.changeGrid(2, 8);
+            maze_policy.reAcquireStateActionSpace_DynaQ(std::tuple<int, int> {1, 8});
+            maze_policy.reAcquireStateActionSpace_DynaQ(std::tuple<int, int> {3, 8});
+            maze_policy.reAcquireStateActionSpace_DynaQ_Plus(std::tuple<int, int> {1, 8}, time_step);
+            maze_policy.reAcquireStateActionSpace_DynaQ_Plus(std::tuple<int, int> {3, 8}, time_step);
+            maze_model.reacquireModel_DynaQ_Plus(std::tuple<int, int> {1, 8});
+            maze_model.reacquireModel_DynaQ_Plus(std::tuple<int, int> {3, 8});
         }
         
         /// Real Exprience
         // If a Dyna-Q episode is just finished, start a new one
         if (maze_response_DynaQ.finished) {
             curr_state_DynaQ = grid_world.getStartPos();
+            std::cout << "Dyna-Q episode time stamp: " << time_step << std::endl;
         }
         // If a Dyna-Q+ episode is just finished, start a new one
         if (maze_response_DynaQ_Plus.finished) {
             curr_state_DynaQ_Plus = grid_world.getStartPos();
+            std::cout << "Dyna-Q+ episode time stamp: " << time_step << std::endl;
         }
         // Get the actions according to soft policy
         curr_move_DynaQ = maze_policy.getSoftPolicy_DynaQ(curr_state_DynaQ);
@@ -116,6 +124,10 @@ int main() {
                                                         rand_simulation_DynaQ_Plus.result_reward, time_step, true);
         }
         
+        // Prepare for next step
+        curr_state_DynaQ = maze_response_DynaQ.next_state;
+        curr_state_DynaQ_Plus = maze_response_DynaQ_Plus.next_state;
+        
         // Increment the time step
         ++ time_step;
     }
@@ -148,6 +160,11 @@ int main() {
     }
     episode_DynaQ.push_back(curr_state_DynaQ);
     
+    // Print out the episode length of Dyna-Q
+    std::cout << "Total length of Dyna-Q episode is: " << episode_DynaQ.size() << "\n";
+    // Visualize the greedy episode of Dyna-Q
+    maze_visual.drawMazeEpisode(episode_DynaQ);
+    
     // Generate a single greedy episode, Dyna-Q+
     while (!maze_response_DynaQ_Plus.finished) {
         maze_response_DynaQ_Plus = maze_env.getMazeResponse(curr_state_DynaQ_Plus, curr_move_DynaQ_Plus);
@@ -158,12 +175,9 @@ int main() {
     }
     episode_DynaQ_Plus.push_back(curr_state_DynaQ_Plus);
     
-    // Print out the episode lengths
-    std::cout << "Total length of Dyna-Q episode is: " << episode_DynaQ.size() << "\n";
+    // Print out the episode length of Dyna-Q+
     std::cout << "Total length of Dyna-Q+ episode is: " << episode_DynaQ_Plus.size() << "\n";
-    
-    // Visualize the greedy episodes
-    maze_visual.drawMazeEpisode(episode_DynaQ);
+    // Visualize the greedy episode of Dyna-Q+
     maze_visual.drawMazeEpisode(episode_DynaQ_Plus);
     
     return 0;
