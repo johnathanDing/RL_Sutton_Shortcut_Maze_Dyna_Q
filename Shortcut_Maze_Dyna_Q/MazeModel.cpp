@@ -74,7 +74,7 @@ MazePastExp MazeModel::getPastResponse_DynaQ() const
     static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
     // Dynamic RNG for state
     int curr_map_size(static_cast<int>(state_action_space_DynaQ.size()));
-    std::uniform_int_distribution<> state_RNG(0, curr_map_size-1);
+    std::uniform_int_distribution<int> state_RNG(0, curr_map_size-1);
     
     // Set up constant iterator at the beginning of map
     std::map<std::tuple<int, int>, std::vector<std::tuple<int, int>>>::const_iterator iter_state;

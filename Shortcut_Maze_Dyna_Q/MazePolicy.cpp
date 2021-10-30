@@ -149,16 +149,34 @@ std::tuple<int, int> MazePolicy::getGreedyPolicy_DynaQ(std::tuple<int, int> curr
 {
     std::tuple<int, int> greedy_move;
     
+    // Static RNG engine for randomly breaking tied max
+//    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+    static std::mt19937 mersenne_eng;
+    
     // If state has not been seen, return a random policy
     if (state_action_val_DynaQ.find(curr_state) == state_action_val_DynaQ.end()) {
         greedy_move = getRandomPolicy_DynaQ(curr_state);
     }
-    // If seen, return greedy policy as usual
+    // If seen, return greedy policy. Break ties randomly
     else {
         std::vector<double>::const_iterator iter_max_val;
         iter_max_val = std::max_element(state_action_val_DynaQ.at(curr_state).begin(),
                                         state_action_val_DynaQ.at(curr_state).end());
-        int idx_max_val (static_cast<int>(std::distance(state_action_val_DynaQ.at(curr_state).begin(), iter_max_val)));
+        // Find the indices of all max elements
+        std::vector<int> idx_all_max;
+        while (iter_max_val != state_action_val_DynaQ.at(curr_state).end()) {
+            idx_all_max.push_back(static_cast<int>(std::distance(state_action_val_DynaQ.at(curr_state).begin(), iter_max_val)));
+            iter_max_val = std::find(std::next(iter_max_val), state_action_val_DynaQ.at(curr_state).end(), *iter_max_val);
+        }
+        int idx_max_val;
+        // If there's more than one max value, randomly select one
+        if (static_cast<int>(idx_all_max.size()) > 1) {
+            std::uniform_int_distribution<> max_RNG(0, static_cast<int>(idx_all_max.size())-1);
+            idx_max_val = idx_all_max.at(max_RNG(mersenne_eng));
+        }
+        else {
+            idx_max_val = idx_all_max.at(0);
+        }
         greedy_move = state_action_space_DynaQ.at(curr_state).at(idx_max_val);
     }
     
@@ -171,6 +189,10 @@ std::tuple<int, int> MazePolicy::getGreedyPolicy_DynaQ_Plus(std::tuple<int, int>
 {
     std::tuple<int, int> greedy_move;
     
+    // Static RNG engine for randomly breaking tied max
+//    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+    static std::mt19937 mersenne_eng;
+    
     // If state has not been seen, return a random policy
     if (state_action_val_DynaQ_Plus.find(curr_state) == state_action_val_DynaQ_Plus.end()) {
         greedy_move = getRandomPolicy_DynaQ_Plus(curr_state);
@@ -179,25 +201,51 @@ std::tuple<int, int> MazePolicy::getGreedyPolicy_DynaQ_Plus(std::tuple<int, int>
     else {
         
         int idx_max_val;
+        // To store the indices of all max elements
+        std::vector<int> idx_all_max;
         // If time interval bonus reward should be considered in action selection
         if (bonus_reward) {
             std::vector<double>::iterator iter_max_val;
             // Get a new vector combining SA value and time reward
             std::vector<double> sa_val_with_reward;
             for (int i(0); i<static_cast<int>(state_action_val_DynaQ_Plus.at(curr_state).size()); ++i) {
-                sa_val_with_reward.push_back(state_action_val_DynaQ_Plus.at(curr_state)[i] +
+                sa_val_with_reward.push_back(state_action_val_DynaQ_Plus.at(curr_state).at(i) +
                                              kappa * sqrt(time_stamp - state_action_time_DynaQ_Plus.at(curr_state).at(i)));
                 
             }
             iter_max_val = std::max_element(sa_val_with_reward.begin(), sa_val_with_reward.end());
-            idx_max_val = static_cast<int>(std::distance(sa_val_with_reward.begin(), iter_max_val));
+            while (iter_max_val != sa_val_with_reward.end()) {
+                idx_all_max.push_back(static_cast<int>(std::distance(sa_val_with_reward.begin(), iter_max_val)));
+                iter_max_val = std::find(std::next(iter_max_val), sa_val_with_reward.end(), *iter_max_val);
+            }
+            // If there's more than one max value, randomly select one
+            if (static_cast<int>(idx_all_max.size()) > 1) {
+                std::uniform_int_distribution<> max_RNG(0, static_cast<int>(idx_all_max.size())-1);
+                idx_max_val = idx_all_max.at(max_RNG(mersenne_eng));
+            }
+            else {
+                idx_max_val = idx_all_max.at(0);
+            }
         }
         // If bonus reward is not considered
         else {
             std::vector<double>::const_iterator iter_max_val;
             iter_max_val = std::max_element(state_action_val_DynaQ_Plus.at(curr_state).begin(),
                                             state_action_val_DynaQ_Plus.at(curr_state).end());
-            idx_max_val = static_cast<int>(std::distance(state_action_val_DynaQ_Plus.at(curr_state).begin(), iter_max_val));
+            while (iter_max_val != state_action_val_DynaQ_Plus.at(curr_state).end()) {
+                idx_all_max.push_back(static_cast<int>(std::distance(state_action_val_DynaQ_Plus.at(curr_state).begin(),
+                                                                     iter_max_val)));
+                iter_max_val = std::find(std::next(iter_max_val), state_action_val_DynaQ_Plus.at(curr_state).end(),
+                                         *iter_max_val);
+            }
+            // If there's more than one max value, randomly select one
+            if (static_cast<int>(idx_all_max.size()) > 1) {
+                std::uniform_int_distribution<> max_RNG(0, static_cast<int>(idx_all_max.size())-1);
+                idx_max_val = idx_all_max.at(max_RNG(mersenne_eng));
+            }
+            else {
+                idx_max_val = idx_all_max.at(0);
+            }
         }
         greedy_move = state_action_space_DynaQ_Plus.at(curr_state).at(idx_max_val);
     }
@@ -210,7 +258,8 @@ std::tuple<int, int> MazePolicy::getSoftPolicy_DynaQ(std::tuple<int, int> curr_s
 {
     std::tuple<int, int> soft_move;
     // Static RNG engine for soft policy
-    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+//    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+    static std::mt19937 mersenne_eng;
     static std::uniform_real_distribution<double> soft_RNG(0.0, 1.0);
     
     if (soft_RNG(mersenne_eng) <= epsilon_soft) {
@@ -228,7 +277,8 @@ std::tuple<int, int> MazePolicy::getSoftPolicy_DynaQ_Plus(std::tuple<int, int> c
 {
     std::tuple<int, int> soft_move;
     // Static RNG for soft policy
-    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+//    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+    static std::mt19937 mersenne_eng;
     static std::uniform_real_distribution<double> soft_RNG(0.0, 1.0);
     
     if (soft_RNG(mersenne_eng) <= epsilon_soft) {
@@ -244,12 +294,23 @@ std::tuple<int, int> MazePolicy::getSoftPolicy_DynaQ_Plus(std::tuple<int, int> c
 
 void MazePolicy::reAcquireStateActionSpace_DynaQ(std::tuple<int, int> curr_state)
 {
-    std::vector<std::tuple<int, int>> all_actions_new (maze_env.getAvailableMoves(curr_state));
-    for (std::tuple<int, int> move: all_actions_new) {
-        if (std::find(state_action_space_DynaQ.at(curr_state).begin(), state_action_space_DynaQ.at(curr_state).end(), move) ==
-            state_action_space_DynaQ.at(curr_state).end()) {
-            state_action_space_DynaQ.at(curr_state).push_back(move);
-            state_action_val_DynaQ.at(curr_state).push_back(0);
+    std::vector<std::tuple<int, int>> all_available_actions (maze_env.getAvailableMoves(curr_state));
+    
+    // Initialize current state-action space if state is missing
+    if (state_action_space_DynaQ.find(curr_state) == state_action_space_DynaQ.end()) {
+        state_action_space_DynaQ.insert(std::pair<std::tuple<int, int>, std::vector<std::tuple<int, int>>>
+                                        (curr_state, all_available_actions));
+        state_action_val_DynaQ.insert(std::pair<std::tuple<int, int>, std::vector<double>>
+                                      (curr_state, std::vector<double> (static_cast<int>(all_available_actions.size()), 0.0)));
+    }
+    // If state already exists, find the new moves and append
+    else {
+        for (std::tuple<int, int> move: all_available_actions) {
+            if (std::find(state_action_space_DynaQ.at(curr_state).begin(), state_action_space_DynaQ.at(curr_state).end(), move)
+                == state_action_space_DynaQ.at(curr_state).end()) {
+                state_action_space_DynaQ.at(curr_state).push_back(move);
+                state_action_val_DynaQ.at(curr_state).push_back(0);
+            }
         }
     }
 };
@@ -257,14 +318,28 @@ void MazePolicy::reAcquireStateActionSpace_DynaQ(std::tuple<int, int> curr_state
 
 void MazePolicy::reAcquireStateActionSpace_DynaQ_Plus(std::tuple<int, int> curr_state, int time_stamp)
 {
-    std::vector<std::tuple<int, int>> all_actions_new (maze_env.getAvailableMoves(curr_state));
-    for (std::tuple<int, int> move: all_actions_new) {
-        if (std::find(state_action_space_DynaQ_Plus.at(curr_state).begin(),
-                      state_action_space_DynaQ_Plus.at(curr_state).end(), move) ==
-            state_action_space_DynaQ_Plus.at(curr_state).end()) {
-            state_action_space_DynaQ_Plus.at(curr_state).push_back(move);
-            state_action_val_DynaQ_Plus.at(curr_state).push_back(0.0);
-            state_action_time_DynaQ_Plus.at(curr_state).push_back(time_stamp);
+    std::vector<std::tuple<int, int>> all_available_actions (maze_env.getAvailableMoves(curr_state));
+    // Initialize current state-action space if state is missing
+    if (state_action_space_DynaQ_Plus.find(curr_state) == state_action_space_DynaQ_Plus.end()) {
+        
+        state_action_space_DynaQ_Plus.insert(std::pair<std::tuple<int, int>, std::vector<std::tuple<int, int>>>
+                                             (curr_state, all_available_actions));
+        state_action_val_DynaQ_Plus.insert(std::pair<std::tuple<int, int>, std::vector<double>>
+                                           (curr_state,
+                                            std::vector<double> (static_cast<int>(all_available_actions.size()), 0.0)));
+        state_action_time_DynaQ_Plus.insert(std::pair<std::tuple<int, int>, std::vector<int>>
+                                            (curr_state,
+                                             std::vector<int> (static_cast<int>(all_available_actions.size()), time_stamp)));
+    }
+    else {
+        for (std::tuple<int, int> move: all_available_actions) {
+            if (std::find(state_action_space_DynaQ_Plus.at(curr_state).begin(),
+                          state_action_space_DynaQ_Plus.at(curr_state).end(), move)
+                == state_action_space_DynaQ_Plus.at(curr_state).end()) {
+                state_action_space_DynaQ_Plus.at(curr_state).push_back(move);
+                state_action_val_DynaQ_Plus.at(curr_state).push_back(0.0);
+                state_action_time_DynaQ_Plus.at(curr_state).push_back(time_stamp);
+            }
         }
     }
 };
@@ -278,11 +353,13 @@ std::tuple<int, int> MazePolicy::getRandomPolicy_DynaQ(std::tuple<int, int> curr
 //    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
     static std::mt19937 mersenne_eng;
     
+    // Get all available actions
+    std::vector<std::tuple<int, int>> all_available_moves(maze_env.getAvailableMoves(curr_state));
     // State-specific size
-    int action_size (static_cast<int>(state_action_space_DynaQ.at(curr_state).size()));
+    int action_size (static_cast<int>(all_available_moves.size()));
     std::uniform_int_distribution<> action_RNG(0, action_size-1);
     
-    random_move = state_action_space_DynaQ.at(curr_state).at(action_RNG(mersenne_eng));
+    random_move = all_available_moves.at(action_RNG(mersenne_eng));
     
     return random_move;
 };
@@ -296,11 +373,13 @@ std::tuple<int, int> MazePolicy::getRandomPolicy_DynaQ_Plus(std::tuple<int, int>
 //    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
     static std::mt19937 mersenne_eng;
     
+    // Get all available actions
+    std::vector<std::tuple<int, int>> all_available_moves(maze_env.getAvailableMoves(curr_state));
     // State-specific size
-    int action_size (static_cast<int>(state_action_space_DynaQ_Plus.at(curr_state).size()));
+    int action_size (static_cast<int>(all_available_moves.size()));
     std::uniform_int_distribution<> action_RNG(0, action_size-1);
     
-    random_move = state_action_space_DynaQ_Plus.at(curr_state).at(action_RNG(mersenne_eng));
+    random_move = all_available_moves.at(action_RNG(mersenne_eng));
     
     return random_move;
 };
