@@ -127,5 +127,36 @@ int main() {
     std::cout << "Total training time is: " << static_cast<double>(total_time)/CLOCKS_PER_SEC << " sec." << "\n";
     
     // Generate a fully-trained, Dyna-Q greedy policy to visualize result
+    std::vector<std::tuple<int, int>> episode_DynaQ, episode_DynaQ_Plus;
+    // Reset time step
+    time_step = 0;
+    // Get the starting states
+    curr_state_DynaQ = grid_world.getStartPos();
+    curr_state_DynaQ_Plus = grid_world.getStartPos();
+    curr_move_DynaQ = maze_policy.getGreedyPolicy_DynaQ(curr_state_DynaQ);
+    curr_move_DynaQ_Plus = maze_policy.getGreedyPolicy_DynaQ_Plus(curr_move_DynaQ_Plus, time_step, false);
+    // Get the response from state-action
+    maze_response_DynaQ.finished = false;
+    maze_response_DynaQ_Plus.finished = false;
+    
+    // Generate a single greedy episode, Dyna-Q
+    while (!maze_response_DynaQ.finished) {
+        maze_response_DynaQ = maze_env.getMazeResponse(curr_state_DynaQ, curr_move_DynaQ);
+        episode_DynaQ.push_back(curr_state_DynaQ);
+        curr_state_DynaQ = maze_response_DynaQ.next_state;
+        curr_move_DynaQ = maze_policy.getGreedyPolicy_DynaQ(curr_state_DynaQ);
+    }
+    episode_DynaQ.push_back(curr_state_DynaQ);
+    
+    // Generate a single greedy episode, Dyna-Q+
+    while (!maze_response_DynaQ_Plus.finished) {
+        maze_response_DynaQ_Plus = maze_env.getMazeResponse(curr_state_DynaQ_Plus, curr_move_DynaQ_Plus);
+        episode_DynaQ_Plus.push_back(curr_state_DynaQ_Plus);
+        curr_state_DynaQ_Plus = maze_response_DynaQ_Plus.next_state;
+        curr_move_DynaQ_Plus = maze_policy.getGreedyPolicy_DynaQ_Plus(curr_state_DynaQ_Plus, time_step, false);
+        ++ time_step;
+    }
+    episode_DynaQ_Plus.push_back(curr_state_DynaQ_Plus);
+    
     
 }
