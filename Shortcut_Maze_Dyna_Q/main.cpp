@@ -158,5 +158,13 @@ int main() {
     }
     episode_DynaQ_Plus.push_back(curr_state_DynaQ_Plus);
     
+    // Print out the episode lengths
+    std::cout << "Total length of Dyna-Q episode is: " << episode_DynaQ.size() << "\n";
+    std::cout << "Total length of Dyna-Q+ episode is: " << episode_DynaQ_Plus.size() << "\n";
     
+    // Visualize the greedy episodes
+    maze_visual.drawMazeEpisode(episode_DynaQ);
+    maze_visual.drawMazeEpisode(episode_DynaQ_Plus);
+    
+    return 0;
 }
