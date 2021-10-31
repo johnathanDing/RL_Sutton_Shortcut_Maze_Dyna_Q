@@ -32,4 +32,17 @@ Depending on how the heurisitic is implemented, Dyna-Q+ can even encourage long 
 Due to the highly standard structure of RL moduels used in our solution, we'll skip the description of code blocks in our discussion. The audience are welcome to look into the well-documented header files in code folder to gain further insights of the solution structure.
 
 ## Result discussion
+###1. The sweetspot solution
+Shown below is the training analysis for both Dyna-Q control, and Dyna-Q+ control under its "sweetspot" parameter (kappa for bonus reward) setting. Here our discount factor in training is gamma = 0.95, learning rate alpha = 0.1, soft policy factor epsilon = 0.1, with Dyna-Q+'s kappa = 5e-4. 
+
+<p float="center">
+  <img src="./Examples/1_Sweetspot_Solution.jpg" width="46%" />
+  <img src="./Examples/1_Sweetspot_Slope.jpg" width="46%" /> 
+</p>
+
+As can be seen in the left plot, the Dyna-Q+ agent was able to finish the first episode much sooner (319 steps) compared to the Dyna-Q agent's 642 steps, thanks to the artificial bonus reward encouraging more exploration of the policy and environment in the planning iterations. Afte the first episode, Dyna-Q agent quickly found the optimal solution as well, and maintained the optimal policy indefinitely. Meanwhile, although the Dyna-Q+ agent found the optimal path much quicker, the exploratory nature of the agent kept trying out sub-optimal paths, making the slope of accumulationg of rewards, as shown in the right plot, slower than Dyna-Q. Until after certain iterations, no bonus rewards can interfere with the optimal state-action values anymore, and the two agents align.
+
+The drastic contrast between the Dyna-Q and Dyna-Q+ agents are most prominant after the maze opens up a shortcut at time step of 3000.
+
+Our choice of parameter settings meaning that a time interval of ((0.95^16)/5e-4)^2 = 774850 steps would be needed to make our artificial bonus reward exceed the optimal policy at starting position, for the long path at the beginning setup of the maze.
 

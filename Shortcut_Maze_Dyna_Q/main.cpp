@@ -65,15 +65,15 @@ int main() {
     
     while (time_step < time_limit) {
         // Open up the shortcut at time stamp = 3000
-//        if (time_step == 3000) {
-//            grid_world.changeGrid(2, 8);
-//            maze_policy.reAcquireStateActionSpace_DynaQ(std::tuple<int, int> {1, 8});
-//            maze_policy.reAcquireStateActionSpace_DynaQ(std::tuple<int, int> {3, 8});
-//            maze_policy.reAcquireStateActionSpace_DynaQ_Plus(std::tuple<int, int> {1, 8}, time_step);
-//            maze_policy.reAcquireStateActionSpace_DynaQ_Plus(std::tuple<int, int> {3, 8}, time_step);
-//            maze_model.reacquireModel_DynaQ_Plus(std::tuple<int, int> {1, 8});
-//            maze_model.reacquireModel_DynaQ_Plus(std::tuple<int, int> {3, 8});
-//        }
+        if (time_step == 3000) {
+            grid_world.changeGrid(2, 8);
+            maze_policy.reAcquireStateActionSpace_DynaQ(std::tuple<int, int> {1, 8});
+            maze_policy.reAcquireStateActionSpace_DynaQ(std::tuple<int, int> {3, 8});
+            maze_policy.reAcquireStateActionSpace_DynaQ_Plus(std::tuple<int, int> {1, 8}, time_step);
+            maze_policy.reAcquireStateActionSpace_DynaQ_Plus(std::tuple<int, int> {3, 8}, time_step);
+            maze_model.reacquireModel_DynaQ_Plus(std::tuple<int, int> {1, 8});
+            maze_model.reacquireModel_DynaQ_Plus(std::tuple<int, int> {3, 8});
+        }
         
         /// Real Exprience
         // If a Dyna-Q episode is just finished, start a new one
