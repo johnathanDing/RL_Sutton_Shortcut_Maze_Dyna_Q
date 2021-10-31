@@ -47,8 +47,8 @@ void MazePolicy::updateStateActionVal_DynaQ(std::tuple<int, int> curr_state, std
     }
     
     // Do the update
-    state_action_val_DynaQ.at(curr_state)[idx_curr_move] += alpha * (reward + gamma * max_next_val -
-                                                                     state_action_val_DynaQ.at(curr_state).at(idx_curr_move));
+    state_action_val_DynaQ.at(curr_state).at(idx_curr_move) += alpha * (reward
+                                        + gamma * max_next_val - state_action_val_DynaQ.at(curr_state).at(idx_curr_move));
 };
 
 
@@ -86,15 +86,15 @@ void MazePolicy::updateStateActionVal_DynaQ_Plus(std::tuple<int, int> curr_state
     // Depending on flag bonus_reward (whether in real or simulated experience), choose whether to include bonus reward in update
     if (bonus_reward) {
         // Include time bonus reward in update, without updating time stamp since this is simulated experience
-        state_action_val_DynaQ_Plus.at(curr_state)[idx_curr_move] += alpha * (reward
+        state_action_val_DynaQ_Plus.at(curr_state).at(idx_curr_move) += alpha * (reward
                                   + kappa*sqrt(time_stamp - state_action_time_DynaQ_Plus.at(curr_state).at(idx_curr_move))
                                   + gamma * max_next_val - state_action_val_DynaQ_Plus.at(curr_state).at(idx_curr_move));
     }
     else {
-        state_action_val_DynaQ_Plus.at(curr_state)[idx_curr_move] += alpha * (reward
+        state_action_val_DynaQ_Plus.at(curr_state).at(idx_curr_move) += alpha * (reward
                                   + gamma * max_next_val - state_action_val_DynaQ_Plus.at(curr_state).at(idx_curr_move));
         // Update the time stamp of current action, only for real experience
-        state_action_time_DynaQ_Plus.at(curr_state).at(idx_curr_move)= time_stamp;
+        state_action_time_DynaQ_Plus.at(curr_state).at(idx_curr_move) = time_stamp;
     }
 };
 
@@ -309,7 +309,7 @@ void MazePolicy::reAcquireStateActionSpace_DynaQ(std::tuple<int, int> curr_state
             if (std::find(state_action_space_DynaQ.at(curr_state).begin(), state_action_space_DynaQ.at(curr_state).end(), move)
                 == state_action_space_DynaQ.at(curr_state).end()) {
                 state_action_space_DynaQ.at(curr_state).push_back(move);
-                state_action_val_DynaQ.at(curr_state).push_back(0);
+                state_action_val_DynaQ.at(curr_state).push_back(0.0);
             }
         }
     }
