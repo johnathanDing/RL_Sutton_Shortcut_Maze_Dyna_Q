@@ -1,7 +1,7 @@
 # Sutton's Shortcut Maze with Dyna-Q and Dyna-Q+
 
 
-      Before shortcut opens        Dyna-Q after shortcut opens      Dyna-Q+ after shortcut opens
+      Before shortcut opens        Dyna-Q after shortcut opens    Dyna-Q+ after shortcut opens
 
 <p float="center">
   <img src="./Examples/No_Shortcut_Recording.gif" width="32%" />
