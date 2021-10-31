@@ -62,4 +62,10 @@ Now we switch the bonus parameter to a moderately high value, with kappa = 1e-3.
   <img src="./Examples/3_ModHighKappa_Slope.jpg" width="48%" /> 
 </p>
 
+### 4. Too high bonus parameter
+As the last data point in our kappa parameter, we look at the consequences of setting the bonus parameter too high. As shown in the plots below, Dyna-Q+ agent spends too much time wandering in the maze. Since the artificial bonus rewards easily exceed the rewards of finding viable maze paths, the agent does not prioritize finding a path at all. This results in extremely low reward accumulation in real experience.
 
+<p float="center">
+  <img src="./Examples/4_TooHighKappa_Solution.jpg" width="48%" />
+  <img src="./Examples/4_TooHighKappa_Slope.jpg" width="48%" /> 
+</p>
