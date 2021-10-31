@@ -81,3 +81,6 @@ Our last discussion focus on the alternative Dyna-Q+ heurisitic, as suggested in
 Obviously, this alternative strategy does not enable Dyna-Q+ agent to find the shortcut, as in previous cases. Bonus parameter used in the above result is kappa = 0.01, but a large range of kappa was tried by the author and none of them enabled finding of the shortcut path.
 
 The reason behind the failure of this alternative approch is the "fake" bonus. The bonus reward at action selection stage does still encourage selection of long-unvisited actions, but right after it's selected, the time stamp of this action is reset, and no actual bonus reward is applied to its action value. This results in a only-once selection of the action, thus making it almost impossible to explore long viable paths after the maze opens up. Therefore, though this alternative Dyna-Q+ does not modify state-action values, it does not provide a viable heuristic, either.
+
+## Conclusion
+In this project, we implemented Dyna-Q and Dyna-Q+ control methods on a changing maze problem. After successfully demonstrating the difference between the two methods, we also explored and discussed various regimes of bonus reward settings for Dyna-Q+, under which many different types of results will occur. We discussed each of these results and their physical meanings.
