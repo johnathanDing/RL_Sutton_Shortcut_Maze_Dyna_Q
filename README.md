@@ -15,4 +15,8 @@ This solution was written in C++ as main language, on Xcode 13.X platform. Visua
 Unit testings were carried out using XCTest as well. All modules have tests except the visualization module, which cannot be supported by XCTest.
 
 ## Problem Statement:
+A maze grid world is set up, initially as shown below on left. The optical path would need to go around the left side of the barrier (upper left). After 3000 time steps, however, a shorter path is opened up along the right side, without disturbing the longer path (upper right).
 
+![Maze problem statement](./Examples/Problem_Statement.png)
+
+We 
