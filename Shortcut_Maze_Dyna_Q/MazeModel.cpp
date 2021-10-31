@@ -55,7 +55,7 @@ void MazeModel::memorizeStateAction_DynaQ_Plus(std::tuple<int, int> curr_state, 
                                                 (curr_state,
                                                  std::vector<std::tuple<double, std::tuple<int, int>>>
                                                  (static_cast<int>(all_available_action.size()),
-                                                  std::tuple<double, std::tuple<int, int>>{0, curr_state})));
+                                                  std::tuple<double, std::tuple<int, int>>{0.0, curr_state})));
     }
     // Iterator to the current action
     std::vector<std::tuple<int, int>>::iterator iter_move(std::find(state_action_space_DynaQ_Plus.at(curr_state).begin(),
@@ -71,7 +71,8 @@ MazePastExp MazeModel::getPastResponse_DynaQ() const
 {
     MazePastExp past_exp;
     // Static RNG
-    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+//    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+    static std::mt19937 mersenne_eng;
     // Dynamic RNG for state
     int curr_map_size(static_cast<int>(state_action_space_DynaQ.size()));
     std::uniform_int_distribution<int> state_RNG(0, curr_map_size-1);
@@ -108,7 +109,8 @@ MazePastExp MazeModel::getPastResponse_DynaQ_Plus() const
 {
     MazePastExp past_exp;
     // Static RNG
-    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+//    static std::mt19937 mersenne_eng(static_cast<std::mt19937::result_type>(std::time(nullptr)));
+    static std::mt19937 mersenne_eng;
     // Dynamic RNG for state
     int curr_map_size(static_cast<int>(state_action_space_DynaQ_Plus.size()));
     std::uniform_int_distribution<> state_RNG(0, curr_map_size-1);
@@ -145,12 +147,26 @@ void MazeModel::reacquireModel_DynaQ_Plus(std::tuple<int, int> curr_state)
 {
     std::vector<std::tuple<int, int>> all_available_action(maze_env.getAvailableMoves(curr_state));
     
-    for (std::tuple<int, int> move : all_available_action) {
-        if (std::find(state_action_space_DynaQ_Plus.at(curr_state).begin(),
-                      state_action_space_DynaQ_Plus.at(curr_state).end(), move) ==
-            state_action_space_DynaQ_Plus.at(curr_state).end()) {
-            state_action_space_DynaQ_Plus.at(curr_state).push_back(move);
-            state_action_response_DynaQ_Plus.at(curr_state).push_back(std::tuple<double, std::tuple<int, int>>{0, curr_state});
+    // If the state is new, add it into model
+    if (state_action_space_DynaQ_Plus.find(curr_state) == state_action_space_DynaQ_Plus.end()) {
+        state_action_space_DynaQ_Plus.insert(std::pair<std::tuple<int, int>, std::vector<std::tuple<int, int>>>
+                                             (curr_state, all_available_action));
+        state_action_response_DynaQ_Plus.insert(std::pair<std::tuple<int, int>,
+                                                std::vector<std::tuple<double, std::tuple<int, int>>>>
+                                                (curr_state,
+                                                 std::vector<std::tuple<double, std::tuple<int, int>>>
+                                                 (static_cast<int>(all_available_action.size()),
+                                                  std::tuple<double, std::tuple<int, int>>{0, curr_state})));
+    }
+    // Otherwise just append the new action to existing list
+    else {
+        for (std::tuple<int, int> move : all_available_action) {
+            if (std::find(state_action_space_DynaQ_Plus.at(curr_state).begin(),
+                          state_action_space_DynaQ_Plus.at(curr_state).end(), move)
+                == state_action_space_DynaQ_Plus.at(curr_state).end()) {
+                state_action_space_DynaQ_Plus.at(curr_state).push_back(move);
+                state_action_response_DynaQ_Plus.at(curr_state).push_back(std::tuple<double, std::tuple<int, int>>{0, curr_state});
+            }
         }
     }
 };
