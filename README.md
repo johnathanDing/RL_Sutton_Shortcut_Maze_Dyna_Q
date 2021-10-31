@@ -63,9 +63,21 @@ Now we switch the bonus parameter to a moderately high value, with kappa = 1e-3.
 </p>
 
 ### 4. Too high bonus parameter
-As the last data point in our kappa parameter, we look at the consequences of setting the bonus parameter too high. As shown in the plots below, Dyna-Q+ agent spends too much time wandering in the maze. Since the artificial bonus rewards easily exceed the rewards of finding viable maze paths, the agent does not prioritize finding a path at all. This results in extremely low reward accumulation in real experience.
+As the last data point in our kappa parameter study, we look at the consequences of setting the bonus parameter too high. As shown in the plots below, Dyna-Q+ agent spends too much time wandering in the maze. Since the artificial bonus rewards easily exceed the rewards of finding viable maze paths, the agent does not prioritize finding a path at all. This results in extremely low reward accumulation in real experience.
 
 <p float="center">
   <img src="./Examples/4_TooHighKappa_Solution.jpg" width="48%" />
   <img src="./Examples/4_TooHighKappa_Slope.jpg" width="48%" /> 
 </p>
+
+### 5. Alternative Dyna-Q+ (fake bonus)
+Our last discussion focus on the alternative Dyna-Q+ heurisitic, as suggested in Sutton's exercise 8.3. Instead of actually applying the bonus reward into state-action value updates in the planning stage, we only use the strategy in action selection, and only pretend that the actions have the bonus rewards, without actually including them in the state-action value updates. Such stragtegy may seem more reasonable at first glance, since it does not require any modification of the state-action values from their real experience values. But further insight can be gained by looking at their training results, shown below.
+
+<p float="center">
+  <img src="./Examples/5_AlterDynaQ_Plus_Solution.jpg" width="48%" />
+  <img src="./Examples/5_AlterDynaQ_Plus_Slope.jpg" width="48%" /> 
+</p>
+
+Obviously, this alternative strategy does not enable Dyna-Q+ agent to find the shortcut, as in previous cases. Bonus parameter used in the above result is kappa = 0.01, but a large range of kappa was tried by the author and none of them enabled finding of the shortcut path.
+
+The reason behind the failure of this alternative approch is the "fake" bonus. The bonus reward at action selection stage does still encourage selection of long-unvisited actions, but right after it's selected, the time stamp of this action is reset, and no actual bonus reward is applied to its action value. This results in a only-once selection of the action, thus making it almost impossible to explore long viable paths after the maze opens up. Therefore, though this alternative Dyna-Q+ does not modify state-action values, it does not provide a viable heuristic, either.
