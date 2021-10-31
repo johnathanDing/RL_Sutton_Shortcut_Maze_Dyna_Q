@@ -32,7 +32,7 @@ Depending on how the heurisitic is implemented, Dyna-Q+ can even encourage long 
 Due to the highly standard structure of RL moduels used in our solution, we'll skip the description of code blocks in our discussion. The audience are welcome to look into the well-documented header files in code folder to gain further insights of the solution structure.
 
 ## Result discussion
-###1. The sweetspot solution
+### 1. The sweetspot solution
 Shown below is the training analysis for both Dyna-Q control, and Dyna-Q+ control under its "sweetspot" parameter (kappa for bonus reward) setting. Here our discount factor in training is gamma = 0.95, learning rate alpha = 0.1, soft policy factor epsilon = 0.1, with Dyna-Q+'s kappa = 5e-4. 
 
 <p float="center">
