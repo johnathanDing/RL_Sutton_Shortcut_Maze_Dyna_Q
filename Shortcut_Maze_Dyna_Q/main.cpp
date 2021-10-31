@@ -27,7 +27,7 @@ int main() {
     // Set up class instances
     GridWorld grid_world(input_grid, start_pos, goal_pos);
     MazeEnv maze_env(grid_world);
-    MazePolicy maze_policy(maze_env, 0.1, 0.1, 0.95, 0.1);
+    MazePolicy maze_policy(maze_env, 0.0005, 0.1, 0.95, 0.1);
     MazeModel maze_model(maze_env);
     MazeVisualizer maze_visual(grid_world);
     
@@ -65,15 +65,15 @@ int main() {
     
     while (time_step < time_limit) {
         // Open up the shortcut at time stamp = 3000
-        if (time_step == 3000) {
-            grid_world.changeGrid(2, 8);
-            maze_policy.reAcquireStateActionSpace_DynaQ(std::tuple<int, int> {1, 8});
-            maze_policy.reAcquireStateActionSpace_DynaQ(std::tuple<int, int> {3, 8});
-            maze_policy.reAcquireStateActionSpace_DynaQ_Plus(std::tuple<int, int> {1, 8}, time_step);
-            maze_policy.reAcquireStateActionSpace_DynaQ_Plus(std::tuple<int, int> {3, 8}, time_step);
-            maze_model.reacquireModel_DynaQ_Plus(std::tuple<int, int> {1, 8});
-            maze_model.reacquireModel_DynaQ_Plus(std::tuple<int, int> {3, 8});
-        }
+//        if (time_step == 3000) {
+//            grid_world.changeGrid(2, 8);
+//            maze_policy.reAcquireStateActionSpace_DynaQ(std::tuple<int, int> {1, 8});
+//            maze_policy.reAcquireStateActionSpace_DynaQ(std::tuple<int, int> {3, 8});
+//            maze_policy.reAcquireStateActionSpace_DynaQ_Plus(std::tuple<int, int> {1, 8}, time_step);
+//            maze_policy.reAcquireStateActionSpace_DynaQ_Plus(std::tuple<int, int> {3, 8}, time_step);
+//            maze_model.reacquireModel_DynaQ_Plus(std::tuple<int, int> {1, 8});
+//            maze_model.reacquireModel_DynaQ_Plus(std::tuple<int, int> {3, 8});
+//        }
         
         /// Real Exprience
         // If a Dyna-Q episode is just finished, start a new one
@@ -88,7 +88,7 @@ int main() {
         }
         // Get the actions according to soft policy
         curr_move_DynaQ = maze_policy.getSoftPolicy_DynaQ(curr_state_DynaQ);
-        curr_move_DynaQ_Plus = maze_policy.getSoftPolicy_DynaQ_Plus(curr_state_DynaQ_Plus, time_step, true);
+        curr_move_DynaQ_Plus = maze_policy.getSoftPolicy_DynaQ_Plus(curr_state_DynaQ_Plus, time_step, false);
         // Get the response from state-action
         maze_response_DynaQ = maze_env.getMazeResponse(curr_state_DynaQ, curr_move_DynaQ);
         maze_response_DynaQ_Plus = maze_env.getMazeResponse(curr_state_DynaQ_Plus, curr_move_DynaQ_Plus);
@@ -121,7 +121,7 @@ int main() {
             maze_policy.updateStateActionVal_DynaQ_Plus(rand_simulation_DynaQ_Plus.prev_state,
                                                         rand_simulation_DynaQ_Plus.prev_move,
                                                         rand_simulation_DynaQ_Plus.result_state,
-                                                        rand_simulation_DynaQ_Plus.result_reward, time_step, false);
+                                                        rand_simulation_DynaQ_Plus.result_reward, time_step, true);
         }
         
         // Prepare for next step
